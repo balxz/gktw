@@ -1,4 +1,4 @@
-import { ButtonBuilder, Client, Cooldown, SectionsBuilder, TemplateButtonsBuilder, Events, MessageType, CarouselBuilder, fetchLatestWaWebVersion, CommandHandler } from "../index.js";
+import { ButtonBuilder, Client, Cooldown, SectionsBuilder, TemplateButtonsBuilder, Events, MessageType, CarouselBuilder, fetchLatestWaWebVersion, CommandHandler } from "@balxz/gktw";
 import fs from "node:fs";
 import util from "util";
 import path from "node:path"
