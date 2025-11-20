@@ -1,0 +1,25 @@
+{
+  "name": "vjs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./example/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typedoc": "^0.28.14"
+  },
+  "dependencies": {
+    "@discordjs/collection": "^2.1.1",
+    "@hapi/boom": "^10.0.1",
+    "@mengkodingan/consolefy": "^1.0.1",
+    "baileys": "^7.0.0-rc.6",
+    "events": "^3.3.0",
+    "pino": "^10.1.0",
+    "util": "^0.12.5"
+  }
+}
