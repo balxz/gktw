@@ -12,6 +12,8 @@ const bot = new Client({
 
 bot.ev.once(Events.ClientReady, (m) => {
     console.log(`ready at ${m.user.id}`);
+    console.log(bot)
+    console.log(m)
 });
 
 bot.ev.on(Events.Poll, (m) => {
@@ -54,14 +56,14 @@ bot.command('collector', async(ctx) => {
 
   col.on("collect", (m) => {
       console.log("COLLECTED", m); // m is an Collections
-      ctx.sendMessage(ctx.id!, {
+      ctx.sendMessage(ctx.id, {
           text: `Collected: ${m.content}\nFrom: ${m.sender}`,
       });
   });
 
   col.on("end", (collector, r) => {
       console.log("ended", r); // r = reason
-      ctx.sendMessage(ctx.id!, { text: `Collector ended` });
+      ctx.sendMessage(ctx.id, { text: `Collector ended` });
   });
 })
 
@@ -75,7 +77,7 @@ bot.command('cooldown', async(ctx) => {
 bot.command('editmessage', async(ctx) => {
   let msg = await ctx.reply('this message will be edited in 2 seconds');
   setTimeout(() => {
-    ctx.editMessage(msg!.key, 'edited!');
+    ctx.editMessage(msg.key, 'edited!');
   }, 2000);
 })
 
@@ -129,7 +131,7 @@ bot.command('mysections', async(ctx) => {
     .build();
 
 
-  ctx.sendInteractiveMessage(ctx.id!, { body: 'this is body', footer: 'this is footer', nativeFlowMessage: { buttons: [section1] } })
+  ctx.sendInteractiveMessage(ctx.id, { body: 'this is body', footer: 'this is footer', nativeFlowMessage: { buttons: [section1] } })
 })
 
 bot.command('mycarousel', async(ctx) => {
