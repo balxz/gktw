@@ -4,3 +4,4 @@
 /temp
 .npmrc
 changes.md
+package-lock.json

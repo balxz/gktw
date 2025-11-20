@@ -1,22 +1,26 @@
-import { ButtonBuilder, Client, Cooldown, SectionsBuilder, TemplateButtonsBuilder, Events, MessageType, CarouselBuilder, fetchLatestWaWebVersion } from "../index.js";
+import { ButtonBuilder, Client, Cooldown, SectionsBuilder, TemplateButtonsBuilder, Events, MessageType, CarouselBuilder, fetchLatestWaWebVersion, CommandHandler } from "../index.js";
 import fs from "node:fs";
 import util from "util";
+import path from "node:path"
 
 const bot = new Client({
-    prefix: "!",
+    prefix: /^[°•π÷×¶∆£¢€¥®™✓=|~zZ+×_*!#%^&./\\©^]/,
     printQRInTerminal: false,
     readIncommingMsg: true,
     usePairingCode: true,
-    phoneNumber: '6283161410763',
+    selfReply: true,
+    phoneNumber: '6283898161609',
 });
 
 bot.ev.once(Events.ClientReady, (m) => {
     console.log(`ready at ${m.user.id}`);
-    console.log(bot)
-    console.log(m)
+    //console.log(bot)
+    //console.log(m)
 });
 
-bot.ev.on(Events.Poll, (m) => {
+//bot.core?.ev.on("messages.upsert", (m) => console.log("MSG UPsert", m));
+
+/*bot.ev.on(Events.Poll, (m) => {
   console.log(`POLL`, m);
 });
 
@@ -26,17 +30,17 @@ bot.ev.on(Events.PollVote, (m) => {
 
 bot.ev.on(Events.Reactions, (m) => {
   console.log(`REACT`, m);
-});
+});*/
 
 bot.use(async (ctx, next) => {
   bot.consolefy?.setTag('from middleware');
-  bot.consolefy?.info(`received: ${JSON.stringify(ctx.used)} | message: ${JSON.stringify(ctx.msg)}`)
+  bot.consolefy?.info(`received: ${ctx.used.prefix} — message: ${ctx.msg.content}`)
   bot.consolefy?.resetTag();
 
   await next();
 });
 
-bot.command('ping', async(ctx) => ctx.reply({ text: 'pong!' }));
+/*bot.command('ping', async(ctx) => ctx.reply({ text: 'pong!' }));
 bot.command('hi', async(ctx) => ctx.reply('hello! you can use string as a first parameter in reply function too!'));
 
 bot.hears('test', async(ctx) => ctx.reply('test 1 2 3 beep boop...'));
@@ -187,7 +191,11 @@ bot.command({
         return ctx.reply({ text: `${err}!` });
       }
     },
-  });
+  });*/
+  
+const cmd = new CommandHandler(bot, path.resolve('example') + '/test');
+cmd.load(true);
+
 
 bot.launch();
 
