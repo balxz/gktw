@@ -1,25 +1,30 @@
-# @balxz/gktw
+<div align="center">
+  <img alt="@balxz/gaktw - Simplified WhatsApp Node.js API" src="https://socialify.git.ci/balxz/gaktw/image?description=1&descriptionEditable=@balxz/gaktw%20is%20a%20simplified%20version%20of%20the%20Baileys%20package%20%0Awhich%20is%20easier%20and%20faster.&font=KoHo&forks=1&issues=1&language=1&name=1&owner=1&pattern=Circuit%20Board&pulls=1&stargazers=1&theme=Auto">
 
-Buat bot WhatsApp yang powerful dengan mudah.
+  <h1 align="center">@balxz/gaktw - Simplified WhatsApp Node.js API</h1>
 
-- **✨ Mudah Digunakan**
-- **🧱 Builder**
-- **🛒 Collector, Cooldown, Command Handler Bawaan**
-- **🚀 Sistem Middleware**
-- **💽 Custom Auth Adapter**
-- **🎉 Dan masih banyak lagi!**
+</div>
 
-## Daftar Isi
-- [Instalasi](#instalasi)
-- [Contoh Penggunaan](#contoh-penggunaan)
-   * [Menggunakan Events](#menggunakan-events)
-- [Konfigurasi Client](#konfigurasi-client)
-- [Opsi Command](#opsi-command)
+**@balxz/gaktw** is a lightweight, user-friendly wrapper around the [Baileys](https://github.com/WhiskeySockets/Baileys) library, designed to simplify building WhatsApp bots and integrations with TypeScript or ESM JavaScript. It offers a streamlined API, robust multi-device support, and seamless database integration for session management.
+
+> [!TIP]
+> Stay updated and get support by joining our [WhatsApp Channel](https://whatsapp.com/channel/0029VbBQG1n3QxRsqN7XkS06).
+
+> [!IMPORTANT]
+> There is no assurance that you won’t get blocked when using this approach. WhatsApp does not permit bots or unofficial clients, so use it at your own risk.
+
+
+### 🛞 Table Of Contents
+- [Installation](#installation)
+- [Example Usage](#example-usage)
+   * [Using Events](#using-events)
+- [Client Configuration](#client-configuration)
+- [Command Options](#command-options)
 - [Command Handler](#command-handler)
-   * [Setup File Utama](#setup-file-utama)
-   * [Struktur File Command](#struktur-file-command)
+   * [Main File Setup](#main-file-setup)
+   * [Command File Structure](#command-file-structure)
 - [Middleware](#middleware)
-   * [Catatan Penting](#catatan-penting)
+   * [Key Notes](#key-notes)
 - [Command Cooldown](#command-cooldown)
 - [Builder](#builder)
    * [Button](#button)
@@ -30,527 +35,380 @@ Buat bot WhatsApp yang powerful dengan mudah.
 - [Collector](#collector)
    * [Message Collector](#message-collector)
    * [Awaited Messages](#awaited-messages)
-- [Mengunduh Media](#mengunduh-media)
-   * [Mengakses Buffer atau Stream Media](#mengakses-buffer-atau-stream-media)
+- [Downloading Media](#downloading-media)
+   * [Accessing Media Buffers or Streams](#accessing-media-buffers-or-streams)
 - [Events](#events)
-   * [Event yang Tersedia](#event-yang-tersedia)
-- [Mengirim Pesan](#mengirim-pesan)
+   * [Available Events](#available-events)
+- [Sending Message](#sending-message)
 - [Formatter](#formatter)
-- [Mengedit Pesan](#mengedit-pesan)
-- [Menghapus Pesan](#menghapus-pesan)
-- [Pesan Poll](#pesan-poll)
+- [Editing Message](#editing-message)
+- [Deleting Message](#deleting-message)
+- [Poll Message](#poll-message)
 - [Mentions](#mentions)
-   * [Mendapatkan Mentions](#mendapatkan-mentions)
+   * [Get Mentions](#get-mentions)
    * [Auto Mention](#auto-mention)
 - [Custom Auth Adapter](#custom-auth-adapter)
-- [Fitur Grup](#fitur-grup)
-- [Lain-lain](#lain-lain)
+- [Group Stuff](#group-stuff)
+- [Miscellaneous](#miscellaneous)
 
-## Instalasi
-
+#### *installation*
 ```bash
-npm install balxz/gktw
-# atau
-yarn add balxz/gktw
-# atau
-pnpm add balxz/gktw
+npm install balxz/gaktw
+```
+```bash
+yarn add balxz/gaktw
+```
+```bash
+pnpm add balxz/gaktw
 ```
 
-## Contoh Penggunaan
-
-```javascript
-const { Client, Events, MessageType } = require("@balxz/gktw");
-
-const bot = new Client({
-    prefix: "!",
-    printQRInTerminal: true,
-    readIncommingMsg: true
-});
-
-bot.ev.once(Events.ClientReady, (m) => {
-    console.log(`siap di ${m.user.id}`);
-});
-
-bot.command('ping', async(ctx) => ctx.reply({ text: 'pong!' }));
-bot.command('hi', async(ctx) => ctx.reply('halo! kamu bisa menggunakan string sebagai parameter pertama di fungsi reply juga!'));
-
-bot.hears('test', async(ctx) => ctx.reply('test 1 2 3 beep boop...'));
-bot.hears(MessageType.stickerMessage, async(ctx) => ctx.reply('wow, stiker keren'));
-bot.hears(['help', 'menu'], async(ctx) => ctx.reply('hears bisa menggunakan array juga!'));
-bot.hears(/(menggunakan\s?)?regex/, async(ctx) => ctx.reply('atau menggunakan regex!'));
-
-bot.launch();
-```
-
-### Menggunakan Events
-
-```javascript
-const { Client, Events } = require("@balxz/gktw");
+#### *example usage*
+```ts
+import { Client, Events, CommandHandler } from "@balxz/gaktw"
+import fs from "node:fs"
+import path from "node:path"
 
 const bot = new Client({
-    prefix: "!", // kamu juga bisa menggunakan array atau regex,
-    printQRInTerminal: true,
-    readIncommingMsg: true
-});
-
-bot.ev.once(Events.ClientReady, (m) => {
-    console.log(`siap di ${m.user.id}`);
-});
-
-bot.ev.on(Events.MessagesUpsert, (m, ctx) => {
-    if(m.key.fromMe) return;
-    if(m.content === "halo") {
-        ctx.reply("hai 👋");
-    }
+    prefix: /^[°•π÷×¶∆£¢€¥®™✓=|~zZ+×_*!#%^&./\\©^]/,
+    printQRInTerminal: false,
+    readIncommingMsg: true,
+    usePairingCode: true,
+    selfReply: true,
+    phoneNumber: "6283898161609",
 })
 
-bot.launch();
+bot.ev.once(Events.ClientReady, (m) => {
+    console.log(`ready at ${m.user.id}`)
+})
+
+
+bot.use(async (ctx, next) => {
+  bot.consolefy?.setTag("from middleware")
+  bot.consolefy?.info(`received: ${ctx.used.prefix} — message: ${ctx.msg.content}`)
+  bot.consolefy?.resetTag()
+  await next()
+})
+
+let cmd = new CommandHandler(bot, path.resolve("example") + "/plug")
+cmd.load(true)
+bot.launch()
 ```
 
-## Konfigurasi Client
+#### *in plugins*
 
-```javascript
-// Contoh konfigurasi ClientOptions
-const bot = new Client({
-    // Prefix bot (bisa string, array, atau regex)
-    prefix: "!",
-    
-    // Apakah bot harus menandai pesan masuk sebagai sudah dibaca? - Default: false
-    readIncommingMsg: true,
-    
-    // Path ke direktori auth/creds - Default: ./state
-    authDir: "./state",
-    
-    // Cetak QR di terminal? - Default: false
-    printQRInTerminal: true,
-    
-    // Waktu yang dibutuhkan untuk menghasilkan QR baru dalam ms - Default: 60000 ms (1 menit)
-    qrTimeout: 60000,
-    
-    // Apakah client harus menandai sebagai online saat terhubung? - Default: true
-    markOnlineOnConnect: true,
-    
-    // Nomor telepon bot dimulai dengan kode negara (misal 62xxx), Digunakan untuk tujuan pairing code.
-    phoneNumber: "6281234567890",
-    
-    // Hubungkan bot menggunakan metode pairing code daripada metode QR. - Default: false
-    usePairingCode: false,
-    
-    // Apakah bot harus membalas ketika nomor bot sendiri menggunakan command bot? - Default: false
-    selfReply: false,
-    
-    // Opsional menentukan Versi WhatsApp Web kustom
-    WAVersion: [2, 2323, 4],
-    
-    // Kamu dapat mention seseorang tanpa harus memasukkan setiap Whatsapp Jid ke dalam array mentions. - Default: false
-    autoMention: false,
-    
-    // Kamu dapat menggunakan adapter kustom untuk menyimpan auth state sesi bot.
-    authAdapter: null,
-    
-    // Konfigurasi browser untuk client WhatsApp Web. Default ke Chrome di Ubuntu.
-    browser: ["Chrome", "Ubuntu", "20.0.04"]
-});
+```ts
+export default {
+    name: "ping",
+    description: "",
+    category: "general",
+    code: async(ctx) => {
+        ctx.reply({ text: `${Date.now() - (ctx.msg.messageTimestamp * 1000)}ms` })
+    }
+}
 ```
 
-## Opsi Command
+#### *client configuration*
 
-Definisikan command dengan struktur berikut:
-
-```javascript
-// kamu bisa menggunakan fungsi command baru juga! 
-bot.command('ping', async(ctx) => ctx.reply('pong!'))
+```ts
+export interface ClientOptions {
+    /* The bot prefix */
+    prefix: Array<string> | string | RegExp;
+    /* Should bot mark as read the incomming messages? - Default: false */
+    readIncommingMsg?: boolean;
+    /* Path to the auth/creds directory - Default: ./state */
+    authDir?: string;
+    /* Print the qr in terminal? - Default: false */
+    printQRInTerminal?: boolean;
+    /* Time taken to generate new qr in ms - Default: 60000 ms (1 minute) */
+    qrTimeout?: number;
+    /* Should the client mark as online on connect? - Default: true */
+    markOnlineOnConnect?: boolean;
+    /* The bot phone number starts with country code (e.g 62xxx), Used for pairing code purposes. */
+    phoneNumber?: string;
+    /* Connect the bot using pairing code method instead of qr method. - Default: false */
+    usePairingCode?: boolean;
+    /* Should a bot reply when the bot number itself uses its bot command? - Default: false */
+    selfReply?: boolean;
+    /* Optional specify a custom Whatsapp Web Version */
+    WAVersion?: [number, number, number];
+    /* You can mention someone without having to enter each Whatsapp Jid into the `mentions` array. - Default: false */
+    autoMention?: boolean;
+    /* You can use custom adapters to store your bot's session auth state. The default will be stored locally with baileys default multi auth state. */
+    authAdapter?: Promise<any>;
+    /* Browser configuration for the WhatsApp Web client. Default to be Chrome in Ubuntu. You should only set a valid/logical browser config, otherwise the pair will fail. */
+    browser?: WABrowserDescription;
+}
 ```
 
-```javascript
-// atau kamu bisa menggunakan yang lama!
-// Contoh CommandOptions:
-// {
-//     name: string,           // nama command
-//     aliases: Array<string>, // alias command (opsional)
-//     code: (ctx) => Promise  // kode command
-// }
+#### *command options*
 
+_define commands with the following structure:_
+
+```ts
+bot.command(opts: CommandOptions | string, code?: (ctx: Ctx) => Promise<any>)
+```
+
+```ts
+// you can use the new command function code too
+bot.command("ping", async(ctx) => ctx.reply("pong"))
+```
+
+```ts
+// alternatively you can use the old one
+export interface CommandOptions {
+    /* command name */
+    name: string;
+    /* command aliases */
+    aliases?: Array<string>;
+    /* command code */
+    code: (ctx: Ctx) => Promise<any>;
+}
+
+// example
 bot.command({
-  name: 'ping',
-  code: async(ctx) => ctx.reply('pong!')
-});
+  name: "ping",
+  code: async(ctx) => ctx.reply("pong")
+})
 ```
 
-## Command Handler
+#### *command handler*
 
-Dengan command handler kamu tidak perlu semua command berada di satu file.
+_With command handler you dont need all your command is located in one file._
 
-### Setup File Utama
-  ```javascript
-  const { CommandHandler } = require("@balxz/gktw");
-  const path = require("path");
+### main file setup
+  ```ts
+  import { CommandHandler } from "balxz/gaktw"
+  import path from "path"
 
   /* ... */
-  const cmd = new CommandHandler(bot, path.resolve() + '/PathCommands');
-  cmd.load();
-  //cmd.load(false); // sembunyikan log console
+  let cmd = new CommandHandler(bot, path.resolve() + "/CommandsPath")
+  cmd.load()
+  //cmd.load(false) // hide log console
 
   /* ...bot.launch() */
   ```
 
-### Struktur File Command
+#### command file structure
 
-```javascript
-// contoh command
+```ts
+// command example
 module.exports = {
     name: "ping",
     code: async (ctx) => {
-        ctx.reply("pong!");
+        ctx.reply("pong")
     },
-};
+}
 
-// Contoh tipe Hears
+// Hears type example
 module.exports = {
-    name: "contoh hears",
+    name: "hears example",
     type: "hears",
     code: async (ctx) => {
-        ctx.reply("Halo dunia!");
+        ctx.reply("Hello world")
     },
-};
+}
 ```
 
-Kamu bisa menambahkan properti `type` untuk mendefinisikan tipe handler... Untuk saat ini hanya ada tipe `command` dan `hears`.
+_You can add a `type` property to define the handler type... For now there are only `command` and `hears` types._
   
-## Middleware
+## middleware
 
-Middleware memungkinkan kamu untuk mencegat dan memproses pesan sebelum mencapai pemrosesan lebih lanjut. Kontrol alur pesan menggunakan `next()` untuk melanjutkan pemrosesan atau return untuk menghentikan. Middleware hanya berjalan sebelum menjalankan command yang ada. Tidak semua pesan masuk ke middleware.
+Middleware allows you to intercept and process messages before they reach further processing. Control message flow using `next()` to continue processing or return to terminate. Middleware is only run before executing an existing command. Not all messages go to the middleware.
 
-```javascript
+```ts
 bot.use(async (ctx, next) => {
-  // Logika pra-proses di sini
-  console.log(`diterima: ${JSON.stringify(ctx.used)}`);
+  // pre-process logic here
+  console.log(`received: ${JSON.stringify(ctx.used)}`)
 
-  await next();
-});
+  await next()
+})
 ```
 
-### Catatan Penting
+### key Notes
 
--  **Urutan Eksekusi**: Middleware berjalan berurutan berdasarkan urutan pendaftaran.
-    ```javascript
-    bot.use(middleware1); // Dijalankan pertama
-    bot.use(middleware2); // Dijalankan kedua
+-  **Execution Order**: Middlewares run sequentially based on registration order.
+    ```ts
+    bot.use(middleware1) // First run
+    bot.use(middleware2) // Second run
     ```
--  **Kontrol Alur**: Abaikan `next()` untuk mencegah eksekusi command.
-    ```javascript
+-  **Flow Control**: Omit `next()` to prevent command execution.
+    ```ts
     bot.use(async (ctx, next) => {
-      if(kondisi) return; // Blokir
-      await next();
-    });
+      if(condition) return // Block
+      await next()
+    })
     ```
 
 
 ## Command Cooldown
 
-Cooldown dapat memberikan delay pada command. Ini dapat dilakukan untuk mencegah pengguna melakukan spam command bot kamu.
+Cooldown can give a delay on the command. This can be done to prevent users from spamming your bot commands.
 
-```javascript
-const { Cooldown } = require("@balxz/gktw"); // import class Cooldown
+```js
+import { Cooldown } from "balxz/gaktw" // import the Cooldown class
 
-bot.command('ping', async(ctx) => {
-    const cd = new Cooldown(ctx, 8000); // tambahkan ini. Waktu cooldown harus dalam milidetik.
-    if(cd.onCooldown) return ctx.reply(`Pelan-pelan! tunggu ${cd.timeleft}ms`); // jika user memiliki cooldown hentikan kode dengan return sesuatu.
+bot.command("ping", async(ctx) => {
+    const cd = new Cooldown(ctx, 8000) // add this. Cooldown time must be in milliseconds.
+    if(cd.onCooldown) return ctx.reply(`Slow down! wait ${cd.timeleft}ms`) // if user has cooldown stop the code by return something.
 
-    ctx.reply('pong!')
+    ctx.reply("pong")
 })
 ```
 
-Jika kamu ingin memicu fungsi tertentu ketika cooldown berakhir, kamu dapat menggunakan event `end` di cooldown:
+If you want to trigger some function when the cooldown end, you can use the `end` events in the cooldown:
 
-```javascript
-// ⚠ Akan selalu dipicu ketika cooldown berakhir (meskipun pengguna hanya menjalankan command sekali)
+
+```ts
+// ⚠ Will always be triggered when the cooldown is over (even though the users only runs the command once)
 cd.on("end", () => {
-  ctx.reply({ text: "cooldown timeout" });
+  ctx.reply({ text: "cd timeout" })
 })
 ```
 
-```javascript
-// Props Cooldown
+```ts
+// coldown props
 
-// cek apakah pengirim sedang cooldown
+/* check if sender is on cooldown */
 cd.onCooldown; // boolean
 
-// cek sisa waktu cooldown (dalam ms)
+/* check the cooldown time left (in ms) */
 cd.timeleft; // number
 ```
 
-## Builder
+#### contact
+  Send a contact.
 
-> **⚠ Peringatan:** Beberapa builder seperti Button, Sections, atau Carousel mungkin tidak berfungsi seperti yang diharapkan karena kebijakan dan pembatasan WhatsApp. Pastikan penggunaan kamu mematuhi ketentuan layanan WhatsApp.
-
-### Button
-  Buat pesan button dengan Button Builder. 
-
-  ```javascript
-  // ButtonType: 'cta_url' | 'cta_call' | 'cta_copy' | 'cta_reminder' | 'cta_cancel_reminder' | 'address_message' | 'send_location' | 'quick_reply'
-  ```
-
-  ```javascript
-  const { ButtonBuilder } = require("@balxz/gktw");
-
-  let button = new ButtonBuilder()
-      .setId('!ping')
-      .setDisplayText('command Ping')
-      .setType('quick_reply')
-      .build();
-
-  let button2 = new ButtonBuilder()
-      .setId('id2')
-      .setDisplayText('salin kode')
-      .setType('cta_copy')
-      .setCopyCode('halo dunia')
-      .build();
-
-  let button3 = new ButtonBuilder()
-      .setId('id3')
-      .setDisplayText('@balxz/gktw')
-      .setType('cta_url')
-      .setURL('https://github.com/balxz/gktw')
-      .setMerchantURL('https://github.com/balxz')
-      .build();
-
-  // gunakan sendInteractiveMessage jika kamu tidak ingin quote pesan.
-  ctx.replyInteractiveMessage({ 
-    body: 'ini body', 
-    footer: 'ini footer', 
-    nativeFlowMessage: { buttons: [button, button2, button3] } 
-  })
-  ```
-
-### Sections
-  Pesan sections seperti list.
-
-  ```javascript
-  const { SectionsBuilder } = require("@balxz/gktw");
-
-  let section1 = new SectionsBuilder()
-    .setDisplayText("Klik saya")
-    .addSection({
-      title: 'Judul 1',
-      rows: [
-        { header: "Header Baris 1", title: "Judul Baris 1", description: "Deskripsi Baris 1", id: "Id Baris 1" },
-        { header: "Header Baris 2", title: "Judul Baris 2", description: "Deskripsi Baris 2", id: "Id Baris 2" }
-      ]
-    })
-    .addSection({
-      title: 'Ini judul 2',
-      rows: [
-        { title: "Ping", id: "!ping" },
-        { title: "Halo dunia", id: "halo dunia" },
-      ]
-    })
-    .build();
-
-
-  ctx.sendInteractiveMessage(ctx.id, { 
-    body: 'ini body', 
-    footer: 'ini footer', 
-    nativeFlowMessage: { buttons: [section1] }  // berikan ke properti buttons
-  })
-  ```
-
-### Carousel
-  Pesan carousel adalah tipe pesan yang meluncur seperti carousel.
-
-  ```javascript
-  const { ButtonBuilder, CarouselBuilder } = require("@balxz/gktw");
-
-  let button = new ButtonBuilder()
-      .setId('!ping')
-      .setDisplayText('command Ping')
-      .setType('quick_reply')
-      .build();
-
-  let exampleMediaAttachment = await ctx.prepareWAMessageMedia({ image: { url:  "https://github.com/balxz.png" } }, { upload: ctx._client.waUploadToServer })
-  let cards = new CarouselBuilder()
-    .addCard({
-      body: "BODY 1",
-      footer: "FOOTER 1",
-      header: {
-        title: "JUDUL HEADER 1",
-        // header kartu harus memiliki lampiran media
-        hasMediaAttachment: true,
-        ...exampleMediaAttachment
-      },
-      nativeFlowMessage: { buttons: [button] } // membutuhkan minimal 1 button
-    })
-    .addCard({
-      body: "BODY 2",
-      footer: "FOOTER 2",
-      header: {
-        title: "JUDUL HEADER 2",
-        // header kartu harus memiliki lampiran media
-        hasMediaAttachment: true,
-        ...exampleMediaAttachment // kamu bisa menggunakan lampiran media lain
-      },
-      nativeFlowMessage: { buttons: [button] } // membutuhkan minimal 1 button
-    })
-    .build();
-
-
-  ctx.replyInteractiveMessage({ 
-      body: "ini body",
-      footer: "ini footer",
-      carouselMessage: {
-          cards,
-      },
-  });
-  ```
-
-### Contact
-  Kirim kontak.
-
-  ```javascript
-  const { VCardBuilder } = require("@balxz/gktw");
+  ```ts
+  import { VCardBuilder } from "balxz/gaktw"
 
   const vcard = new VCardBuilder()
-      .setFullName("John Doe") // nama lengkap
-      .setOrg("PT Mencari Cinta Sejati") // nama organisasi
-      .setNumber("621234567890") // nomor telepon
-      .build(); // fungsi build diperlukan di akhir
+      .setFullName("John Doe") // full name
+      .setOrg("PT Mencari Cinta Sejati") // organization name
+      .setNumber("621234567890") // phone number
+      .build(); // required build function at end
 
-  ctx.reply({ contacts: { displayName: "John D", contacts: [{ vcard }] }});
-  ```
-
-### Template Buttons
-  Kirim button dengan "lampiran".
-
-  ```javascript
-  const { TemplateButtonsBuilder } = require("@balxz/gktw");
-
-  const templateButtons = new TemplateButtonsBuilder()
-        .addURL({ displayText: 'gktw di Github', url: 'https://github.com/balxz/gktw' })
-        .addCall({ displayText: 'hubungi saya', phoneNumber: '+1234567890' })
-        .addQuickReply({ displayText: 'hanya button normal', id: 'btn1' })
-        .build(); // fungsi build diperlukan di akhir
-
-    ctx.sendMessage(ctx.id, { text: "template buttons", templateButtons });
+  ctx.reply({ contacts: { displayName: "John D", contacts: [{ vcard }] }})
   ```
 
 ## Collector
 
-Kamu dapat mengkonfigurasi collector menggunakan opsi berikut:
-```javascript
-// Interface CollectorArgs:
-// {
-//     time: number,              // timeout collector dalam milidetik
-//     max: number,               // berapa banyak pesan yang telah melewati filter
-//     endReason: string[],       // akan berhenti jika alasan end cocok dengan alasan col.stop kamu
-//     maxProcessed: number,      // batasi berapa banyak pesan yang harus diproses
-//     filter: () => boolean      // fungsi sebagai filter untuk pesan masuk
-// }
+You can configure the collector using the following options:
+```ts
+export interface CollectorArgs {
+    /* collector timeout in milliseconds */
+    time?: number;
+    /* how many messages have passed through the filter */
+    max?: number;
+    /* will be stop if end reason is match with your col.stop reason  */
+    endReason?: string[];
+    /* limit how many messages must be processed. */
+    maxProcessed?: number;
+    /* a function as a filter for incoming messages. */
+    filter?: () => boolean;
+}
 ```
 
-### Message Collector
-  ```javascript
-  let col = ctx.MessageCollector({ time: 10000 }); // dalam milidetik
-  ctx.reply({ text: "katakan sesuatu... Timeout: 10s" });
+#### message collector
+  ```ts
+  let col = ctx.MessageCollector({ time: 10000 }); // in milliseconds
+  ctx.reply({ text: "say something... Timeout: 10s" });
 
   col.on("collect", (m) => {
-      console.log("DIKUMPULKAN", m); // m adalah Collections
+      console.log("COLLECTED", m); // m is an Collections
       ctx.sendMessage(ctx.id, {
-          text: `Dikumpulkan: ${m.content}\nDari: ${m.sender}`,
+          text: `Collected: ${m.content}\nFrom: ${m.sender}`,
       });
   });
 
   col.on("end", (collector, r) => {
-      console.log("berakhir", r); // r = alasan
-      ctx.sendMessage(ctx.id, { text: `Collector berakhir` });
+      console.log("ended", r); // r = reason
+      ctx.sendMessage(ctx.id, { text: `Collector ended` });
   });
   ```
 
-### Awaited Messages
-  ```javascript
-  ctx.awaitMessages({ time: 10000 }).then((m) => ctx.reply(`dapat ${m.length} panjang array`)).catch(() => ctx.reply('selesai'))
+#### awaited Messages
+  ```ts
+  ctx.awaitMessages({ time: 10000 }).then((m) => ctx.reply(`got ${m.length} array length`)).catch(() => ctx.reply('end'))
   ```
 
-## Mengunduh Media
+#### downloading media
+The example below demonstrates saving a received image to `./saved.jpeg`.
 
-Contoh di bawah mendemonstrasikan menyimpan gambar yang diterima ke `./saved.jpeg`.
-
-```javascript
-const { MessageType } = require("@balxz/gktw");
-const fs = require("fs");
+```ts
+import { MessageType } from "balxz/gaktw"
+import fs from "node:fs"
 
 bot.ev.on(Events.MessagesUpsert, async(m, ctx) => {
     if(ctx.getMessageType() === MessageType.imageMessage) {
-        const buffer = await ctx.msg.media.toBuffer();
-        fs.writeFileSync('./saved.jpeg', buffer);
+        const buffer = await ctx.msg.media.toBuffer()
+        fs.writeFileSync('./saved.jpeg', buffer)
     }
-});
+})
 ```
 
-### Mengakses Buffer atau Stream Media
-
-```javascript
-// Dapatkan media pesan saat ini
+#### Accessing Media Buffers or Streams
+```ts
+// Get current message media
 ctx.msg.media.toBuffer();
 ctx.msg.media.toStream();
 
-// Dapatkan media pesan yang dikutip
+// Get quoted message media
 ctx.quoted.media.toBuffer();
 ctx.quoted.media.toStream();
 ```
 
-## Events
+#### events
+To utilize events, import the `Events` constant:
 
-Untuk menggunakan event, import konstanta `Events`:
-
-```javascript
-const { Events } = require("@balxz/gktw");
+```ts
+import { Events } from "balxz/gaktw";
 ```
 
-### Event yang Tersedia
-- **ClientReady** - Dipicu ketika bot siap.
-- **MessagesUpsert** - Dipicu ketika pesan diterima.
-- **QR** - Kode QR siap untuk dipindai.
-- **GroupsJoin** - Dipicu ketika bot bergabung dengan grup.
-- **UserJoin** - Dipicu ketika seseorang bergabung dengan grup tempat bot berada.
-- **UserLeave** - Dipicu ketika seseorang keluar dari grup.
-- **Poll** - Dipicu ketika pesan poll dibuat.
-- **PollVote** - Dipicu ketika seseorang memilih dalam poll.
-- **Reactions** - Dipicu ketika pesan menerima reaksi.
-- **Call** - Dipicu ketika seseorang menelepon, atau panggilan diterima/ditolak.
-- **ConnectionUpdate** - Dipicu ketika ada perubahan pada status koneksi bot.
+### Available Events
+- **ClientReady** - Triggered when the bot is ready.
+- **MessagesUpsert** - Fired when a message is received.
+- **QR** - QR code is ready to scan.
+- **GroupsJoin** - Triggered when the bot joins a group.
+- **UserJoin** - Triggered when someone joins a group the bot is in.
+- **UserLeave** - Triggered when someone leaves a group.
+- **Poll** - Triggered when a poll message is created.
+- **PollVote** - Triggered when someone votes in a poll.
+- **Reactions** - Triggered when a message receives a reaction.
+- **Call** - Triggered when someone calls, or a call is accepted/rejected.
+- **ConnectionUpdate** - Triggered when there is a change in the bot's connection status.
 
-## Mengirim Pesan
+## Sending Message
 
-```javascript
-// mengirim pesan
-ctx.sendMessage(ctx.id, { text: "halo" });
+```ts
+/* sending a message */
+ctx.sendMessage(ctx.id, { text: "hello" });
 
-// quote pesan
-ctx.reply("halo");
-ctx.reply({ text: "halo" });
+/* quote the message */
+ctx.reply("hello");
+ctx.reply({ text: "hello" });
 
-// kirim gambar
-ctx.sendMessage(ctx.id, { image: { url: 'https://example.com/image.jpeg' }, caption: "caption gambar" });
-ctx.reply({ image: { url: 'https://example.com/image.jpeg' }, caption: "caption gambar" });
+/* send an image */
+ctx.sendMessage(ctx.id, { image: { url: 'https://example.com/image.jpeg' }, caption: "image caption" });
+ctx.reply({ image: { url: 'https://example.com/image.jpeg' }, caption: "image caption" });
 
-// kirim file audio
-ctx.reply({ audio: { url: './audio.mp3' }, mimetype: 'audio/mp4', ptt: false }); // jika "ptt" true, audio akan dikirim sebagai voicenote
+/* send an audio file */
+ctx.reply({ audio: { url: './audio.mp3' }, mimetype: 'audio/mp4', ptt: false }); // if "ptt" is true, the audio will be send as voicenote
 
-// kirim stiker
+/* send an sticker */
 ctx.reply({ sticker: { url: './tmp/generatedsticker.webp' }});
 
-// kirim video
-const fs = require("fs");
-ctx.reply({ video: fs.readFileSync("./video.mp4"), caption: "caption video", gifPlayback: false });
+/* send an video */
+import fs from "node:fs";
+ctx.reply({ video: fs.readFileSync("./video.mp4"), caption: "video caption", gifPlayback: false });
 ```
 
 ## Formatter
-WhatsApp mendukung format dalam pesan, seperti teks tebal atau miring. Gunakan fungsi berikut untuk memformat string:
+WhatsApp supports formatting in messages, such as bold or italic text. Use the following functions to format strings:
 
-```javascript
-const { bold, inlineCode, italic, monospace, quote, strikethrough } = require("@balxz/gktw");
+```ts
+import { bold, inlineCode, italic, monospace, quote, strikethrough } from "balxz/gaktw";
 
-const str = "Halo Dunia";
+const str = "Hello World";
 
 const boldString = bold(str);
 const italicString = italic(str);
@@ -560,73 +418,73 @@ const inlineCodeString = inlineCode(str);
 const monospaceString = monospace(str);
 ```
 
-Untuk detail lebih lanjut, kunjungi [FAQ WhatsApp tentang format](https://faq.whatsapp.com/539178204879377/?cms_platform=web).
+For more details, visit the [WhatsApp FAQ on formatting]((https://faq.whatsapp.com/539178204879377/?cms_platform=web).).
 
-## Mengedit Pesan
-```javascript
-let res = await ctx.reply("teks lama");
-ctx.editMessage(res.key, "teks baru");
+## Editing Message
+```ts
+let res = await ctx.reply("old text");
+ctx.editMessage(res.key, "new text");
 ```
 
-## Menghapus Pesan
-```javascript
+## Deleting Message
+```ts
 let res = await ctx.reply("testing");
 ctx.deleteMessage(res.key);
 ```
 
-## Pesan Poll
-> `singleSelect` berarti kamu hanya dapat memilih satu dari beberapa opsi dalam poll. Default adalah false.
+## Poll Message
+> `singleSelect` means you can only select one of the multiple options in the poll. Default to be false.
 
-```javascript
-ctx.sendPoll(ctx.id, { name: "ini polling", values: ["abc", "def"], singleSelect: true })
+```ts
+ctx.sendPoll(ctx.id, { name: "ini polling", values: ["abc", "def"], singleSelect: true })
 ```
 
 ## Mentions
 
-### Mendapatkan Mentions
-Dapatkan array JID pengguna yang disebutkan. Misalnya, pesan berisi `halo @jstn @person` di mana `@jstn` & `@person` adalah mention, maka kamu bisa mendapatkan array yang berisi jid dari dua pengguna yang disebutkan.
+### Get Mentions
+Retrieve an array of mentioned users' JIDs. For example, a message containing `hello @jstn @person` where `@jstn` & `@person` is a mention, then you can get an array containing the jid of the two mentioned users.
 
-```javascript
-ctx.getMentioned() // Mengembalikan array JID
+```ts
+ctx.getMentioned() // Returns an array of JIDs
 ```
 
 ### Auto Mention
-Kamu dapat mention seseorang **tanpa** harus memasukkan setiap Whatsapp Jid ke dalam array `mentions`.
+You can mention someone **without** having to enter each Whatsapp Jid into the `mentions` array.
 
-- Pertama, kamu perlu mengaktifkan opsi `autoMention` di client kamu.
-  ```javascript
+- First, you need to enable the `autoMention` option in your client.
+  ```ts
   const bot = new Client({
     // ...
-    autoMention: true // aktifkan ini
+    autoMention: true // enable this
   });
   ```
-- Kamu dapat langsung mengetik `@` diikuti dengan nomor pengguna yang akan disebutkan. Contohnya seperti ini:
-  ```javascript
-  ctx.reply("Halo @62812345678");
+- You can directly type `@` followed by the user number to be mentioned. For example like this:
+  ```ts
+  ctx.reply("Hello @62812345678");
   ```
 
-Jika kamu masih bingung tentang ini, mungkin kamu bisa memeriksa perbandingan kode untuk mention seseorang di bawah:
+If you are still confused about what this is, perhaps you can check out the code comparison for mentioning someone below:
 
-```javascript
+```ts
 // autoMention: true
-ctx.reply("Halo @62812345678");
+ctx.reply("Hello @62812345678");
 
-// autoMention: false, kamu harus secara manual menentukan mentions
-ctx.reply({ text: "Halo @62812345678", mentions: ['62812345678@s.whatsapp.net'] });
+// autoMention: false, you must manually specify the mentions
+ctx.reply({ text: "Hello @62812345678", mentions: ['62812345678@s.whatsapp.net'] });
 ```
 
 ## Custom Auth Adapter
 
-Kamu dapat menggunakan berbagai adapter, tetapi berikut adalah contoh menggunakan adapter mysql dari library [mysql-baileys](https://www.npmjs.com/package/mysql-baileys). Ini opsional, pada dasarnya auth session akan disimpan secara lokal menggunakan adapter `useMultiFileAuthState` bawaan dari `@whiskeysockets/baileys`.
+You can use a variety of adapters, but here is an example of using the mysql adapter from [mysql-baileys](https://www.npmjs.com/package/mysql-baileys) library. This is optional, basically the auth session will be stored locally using the built-in `useMultiFileAuthState` adapter from `@whiskeysockets/baileys`.
 
-```javascript
+```ts
 // ...
-const { useMySQLAuthState } = require('mysql-baileys'); // Untuk contoh lebih lanjut menggunakan mysql-baileys, kunjungi npmjs.com/mysql-baileys.
+import { useMySQLAuthState } from 'mysql-baileys'; // For more examples of using mysql-baileys, go to npmjs.com/mysql-baileys.
 
 const bot = new Client({
     prefix: "!",
     readIncommingMsg: true,
-    // langsung ditugaskan ke authAdapter.
+    // directly assigned to authAdapter.
     authAdapter: useMySQLAuthState({
       session: "session", 
       password: '',
@@ -637,124 +495,124 @@ const bot = new Client({
 // ...
 ```
   
-## Fitur Grup
-```javascript
-ctx.groups.create(subject, members); // subject: string, members: string[]
-ctx.groups.inviteCodeInfo(code); // code: string
-ctx.groups.acceptInvite(code); // code: string
-ctx.groups.acceptInviteV4(key, inviteMessage); // key: string | proto.IMessageKey, inviteMessage: proto.Message.IGroupInviteMessage
+## Group Stuff
+```ts
+ctx.groups.create(subject: string, members: string[]);
+ctx.groups.inviteCodeInfo(code: string);
+ctx.groups.acceptInvite(code: string);
+ctx.groups.acceptInviteV4(key: string | proto.IMessageKeinviteMessage: proto.Message.IGroupInviteMessage);
 ```
-```javascript
-ctx.group(jid); // jid opsional
+```ts
+ctx.group(jid?: string); // jid is optional
 
 ctx.group().members();
 ctx.group().inviteCode();
 ctx.group().revokeInviteCode();
-ctx.group().joinApproval(mode); // mode: "on" | "off"
+ctx.group().joinApproval(mode: "on" | "off");
 ctx.group().leave();
-ctx.group().membersCanAddMemberMode(mode); // mode: "on" | "off"
+ctx.group().membersCanAddMemberMode(mode: "on" | "off");
 ctx.group().metadata();
-ctx.group().getMetadata(key); // key: keyof GroupMetadata
+ctx.group().getMetadata(key: keyof GroupMetadata);
 ctx.group().name();
 ctx.group().description();
 ctx.group().owner();
-ctx.group().isAdmin(jid); // jid: string
+ctx.group().isAdmin(jid: string);
 ctx.group().isSenderAdmin();
 ctx.group().isBotAdmin();
-ctx.group().toggleEphemeral(expiration); // expiration: number
-ctx.group().updateDescription(description); // description: number
-ctx.group().updateSubject(subject); // subject: number
-ctx.group().membersUpdate(members, action); // members: string[], action: ParticipantAction
-ctx.group().kick(members); // members: string[]
-ctx.group().add(members); // members: string[]
-ctx.group().promote(members); // members: string[]
-ctx.group().demote(members); // members: string[]
+ctx.group().toggleEphemeral(expiration: number);
+ctx.group().updateDescription(description: number);
+ctx.group().updateSubject(subject: number);
+ctx.group().membersUpdate(members: string[], action: ParticipantAction);
+ctx.group().kick(members: string[]);
+ctx.group().add(members: string[]);
+ctx.group().promote(members: string[]);
+ctx.group().demote(members: string[]);
 ctx.group().pendingMembers();
-ctx.group().pendingMembersUpdate(members, action); // members: string[], action: 'reject' | 'approve'
-ctx.group().approvePendingMembers(members); // members: string[]
-ctx.group().rejectPendingMembers(members); // members: string[]
-ctx.group().updateSetting(setting); // setting: 'announcement' | 'not_announcement' | 'locked' | 'unlocked'
+ctx.group().pendingMembersUpdate(members: string[], action: 'reject' | 'approve');
+ctx.group().approvePendingMembers(members: string[]);
+ctx.group().rejectPendingMembers(members: string[]);
+ctx.group().updateSetting(setting: 'announcement' | 'not_announcement' | 'locked' | 'unlocked')
 ctx.group().open()
 ctx.group().close()
 ctx.group().lock()
 ctx.group().unlock()
 ```
 
-## Lain-lain
+## Miscellaneous
 
-```javascript
-// membalas pesan
+```ts
+/* replying message */
 ctx.reply({ text: "test" });
-ctx.reply("kamu bisa menggunakan string sebagai parameter pertama juga!");
+ctx.reply("you can use string as a first parameter too!");
 
-// menggunakan interactive message
-ctx.sendInteractiveMessage(jid, content, options); // jid: string, content: IInteractiveMessageContent, options: MessageGenerationOptionsFromContent | {} = {}
-ctx.replyInteractiveMessage(content, options); // content: IInteractiveMessageContent, options: MessageGenerationOptionsFromContent | {} = {}
+/* using interactive message */
+ctx.sendInteractiveMessage(jid: string, content: IInteractiveMessageContent, options: MessageGenerationOptionsFromContent | {} = {});
+ctx.replyInteractiveMessage(content: IInteractiveMessageContent, options: MessageGenerationOptionsFromContent | {} = {});
 
-// sama dengan bot.command tapi tanpa prefix
+/* same with bot.command but without prefix */
 bot.hears('test', async(ctx) => ctx.reply('test 1 2 3 beep boop...'));
 
-// akan dipicu ketika seseorang mengirim pesan stiker
-const { MessageType } = require("@balxz/gktw");
-bot.hears(MessageType.stickerMessage, async(ctx) => ctx.reply('wow, stiker keren'));
+/* will be triggered when someone sends a sticker message */
+import { MessageType } from "balxz/gaktw";
+bot.hears(MessageType.stickerMessage, async(ctx) => ctx.reply('wow, cool sticker'));
 
-// tambahkan react
-ctx.react(jid, emoji, key); // jid: string, emoji: string, key?: WAProto.IMessageKey
+/* add react */
+ctx.react(jid: string, emoji: string, key?: WAProto.IMessageKey);
 ctx.react(ctx.id, "👀");
 
-// dapatkan timestamp bot siap
+/* get the bot ready at timestamp */
 bot.readyAt;
 
-// dapatkan jid saat ini
+/* get the current jid */
 ctx.id // string
 ctx.decodedId // string 
 
-// dapatkan array argumen yang digunakan
+/* get the array of arguments used */
 ctx.args // Array<string>
 
-// dapatkan detail pengirim
+/* get sender details */
 ctx.sender
 
-// dapatkan quoted
+/* get quoted */
 ctx.quoted
 
-// dapatkan bot user
+/* get bot user */
 ctx.me
 
-// dapatkan tipe pesan
+/* get the message type */
 ctx.getMessageType()
 
-// dapatkan tipe konten
-ctx.getContentType(content) // content: WAProto.IMessage | undefined
+/* get content type */
+ctx.getContentType(content: WAProto.IMessage | undefined)
 
-// unduh konten dari pesan
-ctx.downloadContentFromMessage(downloadable, type, opts) // downloadable: DownloadableMessage, type: MediaType, opts?: MediaDownloadOptions
+/* download content from message */
+ctx.downloadContentFromMessage(downloadable: DownloadableMessage, type: MediaType, opts?: MediaDownloadOptions)
 
-// baca pesan
+/* read the message */
 ctx.read()
 
-// simulasikan status mengetik atau merekam
+/* simulate typing or recording state */
 ctx.simulateTyping()
 ctx.simulateRecording()
 
-// ubah about/bio client
-bot.bio("Hai!");
+/* change the client about/bio */
+bot.bio("Hi there!");
 
-// ambil about/bio seseorang
+/* fetch someone about/bio */
 await bot.fetchBio("1234@s.whatsapp.net");
 
-// blokir dan buka blokir
+/* block and unblock */
 await bot.block("1234@s.whatsapp.net");
 await bot.unblock("1234@s.whatsapp.net");
 
-// dapatkan device
+/* get device */
 ctx.getDevice(id) 
-ctx.getDevice() // dapatkan device pengguna
+ctx.getDevice() // get the user device
 
-// cek apakah chat adalah grup
+/* check whether the chat is a group */
 ctx.isGroup()
 
-// mengakses objek @whiskeysockets/baileys
+/* accessing @whiskeysockets/baileys objects */
 bot.core
 ctx.core
 ```
